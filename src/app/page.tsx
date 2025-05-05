@@ -36,6 +36,8 @@ export default function Home() {
   const [activeSellerStage, setActiveSellerStage] = useState<number>(3);
   const [isHovering, setIsHovering] = useState<number | null>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
+  const [showCompletionAnimation, setShowCompletionAnimation] = useState<boolean>(false);
+  const [animatedSteps, setAnimatedSteps] = useState<number[]>([]);
 
   // State for timeline interactions
   const [showAIComparison, setShowAIComparison] = useState<boolean>(true);
@@ -47,7 +49,7 @@ export default function Home() {
       id: 1,
       title: "Prepare Finances and Initiate Purchase Offer",
       description: "Get pre-approved for a mortgage and start searching for your dream home.",
-      isCompleted: true,
+      isCompleted: false,
       duration: 7,
       traditionalDuration: 14,
       aiBenefit: "AI analyzes your financial profile to match you with the best mortgage options instantly, cutting decision time in half."
@@ -56,7 +58,7 @@ export default function Home() {
       id: 2,
       title: "Compare Offers and Negotiate Terms",
       description: "Review multiple options and negotiate the best deal for your budget.",
-      isCompleted: true,
+      isCompleted: false,
       duration: 5,
       traditionalDuration: 10,
       aiBenefit: "AI provides real-time market comparisons and negotiation insights based on thousands of similar deals in your area."
@@ -96,7 +98,7 @@ export default function Home() {
       id: 1,
       title: "Initial Setup and Listing Preparation",
       description: "Prepare your home for sale and set an optimal listing price.",
-      isCompleted: true,
+      isCompleted: false,
       duration: 5,
       traditionalDuration: 14,
       aiBenefit: "AI analyzes thousands of comparable listings to set the perfect price point and generates staging recommendations for maximum appeal."
@@ -105,7 +107,7 @@ export default function Home() {
       id: 2,
       title: "Listing, Marketing, and Showings",
       description: "List your property and showcase it to potential buyers.",
-      isCompleted: true,
+      isCompleted: false,
       duration: 7,
       traditionalDuration: 21,
       aiBenefit: "AI automatically generates professional listing content and targets marketing to the most likely buyers based on real-time data."
@@ -114,7 +116,7 @@ export default function Home() {
       id: 3,
       title: "Offer and Negotiation",
       description: "Review offers and negotiate the best terms for your property.",
-      isCompleted: true,
+      isCompleted: false,
       duration: 4,
       traditionalDuration: 10,
       aiBenefit: "AI analyzes and compares all offers, highlighting strengths and potential issues in each to maximize your advantage in negotiations."
@@ -232,6 +234,41 @@ export default function Home() {
     setIsVisible(true);
   }, []);
 
+  // Add animation effect for step completion with sequential timing
+  useEffect(() => {
+    if (isVisible && timelineRef.current) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting) {
+            setShowCompletionAnimation(true);
+            
+            // Reset animated steps when tab changes
+            setAnimatedSteps([]);
+            
+            // Get all stages for the active tab
+            const allStages = getActiveStages();
+            
+            // Animate each step one by one with 1-second interval
+            allStages.forEach((stage, index) => {
+              setTimeout(() => {
+                setAnimatedSteps(prev => [...prev, stage.id]);
+              }, index * 1000); // 1-second interval between each step
+            });
+            
+            observer.disconnect();
+          }
+        },
+        { threshold: 0.3 }
+      );
+      
+      observer.observe(timelineRef.current);
+      
+      return () => {
+        observer.disconnect();
+      };
+    }
+  }, [isVisible, activeTab]);
+
   // Handle stage selection for timeline
   const handleStageClick = (stageId: number) => {
     if (activeTab === "buyers") {
@@ -256,7 +293,7 @@ export default function Home() {
   // Helper function to determine progress percentage
   const getProgressPercentage = (): number => {
     const stages = activeTab === "buyers" ? buyerStages : sellerStages;
-    const completed = stages.filter(stage => stage.isCompleted).length;
+    const completed = stages.filter(stage => animatedSteps.includes(stage.id)).length;
     return (completed / stages.length) * 100;
   };
 
@@ -274,6 +311,11 @@ export default function Home() {
   const getTotalDuration = (withAI: boolean = true): number => {
     const stages = activeTab === "buyers" ? buyerStages : sellerStages;
     return stages.reduce((sum, stage) => sum + (withAI ? stage.duration : stage.traditionalDuration), 0);
+  };
+
+  // Helper function to calculate time savings percentage
+  const getTimeSavingsPercentage = (): number => {
+    return Math.round((1 - getTotalDuration(true) / getTotalDuration(false)) * 100);
   };
 
   return (
@@ -348,7 +390,7 @@ export default function Home() {
                 >
                   Go to Dashboard
                 </a>
-                <a 
+                <a
                   href="#" 
                   className="inline-flex items-center justify-center rounded-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 px-6 py-3 text-base font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                 >
@@ -358,35 +400,35 @@ export default function Home() {
             </div>
             <div className="md:w-1/2 relative">
               <div 
-                className="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 relative overflow-hidden"
+                className="bg-blue-50 dark:bg-blue-50 rounded-xl shadow-xl p-6 relative overflow-hidden"
                 style={{
                   boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)",
-                  background: "linear-gradient(180deg, rgba(249,250,251,0.5) 0%, rgba(249,250,251,1) 100%)",
+                  background: "linear-gradient(180deg, rgba(0, 52, 105, 0.5) 0%, rgb(4, 100, 195) 100%)",
                 }}
               >
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   Your Complete Roadmap for Buying or Selling a Home
                 </h2>
-                <p className="text-gray-700 dark:text-gray-300 mb-6">
+                <p className="text-gray-700 dark:text-gray-200 mb-6">
                   Homekey's AI-powered workspace breaks down the complex process of buying or selling a home into simple, manageable steps — eliminating confusion and ensuring nothing falls through the cracks.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                  <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg transition-all hover:bg-blue-100 dark:hover:bg-blue-900/30">
-                    <div className="text-blue-600 dark:text-blue-400 font-bold">✓</div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">Step-by-step guidance through the entire process</p>
+                  <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-900/40 p-3 rounded-lg transition-all hover:bg-blue-100 dark:hover:bg-blue-900/50">
+                    <div className="text-blue-600 dark:text-blue-300 font-bold">✓</div>
+                    <p className="text-sm text-gray-700 dark:text-gray-200">Step-by-step guidance through the entire process</p>
                   </div>
-                  <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg transition-all hover:bg-blue-100 dark:hover:bg-blue-900/30">
-                    <div className="text-blue-600 dark:text-blue-400 font-bold">✓</div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">Track progress and manage tasks with your AI assistant</p>
+                  <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-900/40 p-3 rounded-lg transition-all hover:bg-blue-100 dark:hover:bg-blue-900/50">
+                    <div className="text-blue-600 dark:text-blue-300 font-bold">✓</div>
+                    <p className="text-sm text-gray-700 dark:text-gray-200">Track progress and manage tasks with your AI assistant</p>
                   </div>
-                  <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg transition-all hover:bg-blue-100 dark:hover:bg-blue-900/30">
-                    <div className="text-blue-600 dark:text-blue-400 font-bold">✓</div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">Access all your documents and communications in one place</p>
+                  <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-900/40 p-3 rounded-lg transition-all hover:bg-blue-100 dark:hover:bg-blue-900/50">
+                    <div className="text-blue-600 dark:text-blue-300 font-bold">✓</div>
+                    <p className="text-sm text-gray-700 dark:text-gray-200">Access all your documents and communications in one place</p>
                   </div>
-                  <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg transition-all hover:bg-blue-100 dark:hover:bg-blue-900/30">
-                    <div className="text-blue-600 dark:text-blue-400 font-bold">✓</div>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">Schedule service provider appointments and viewings</p>
+                  <div className="flex items-start gap-3 bg-blue-50 dark:bg-blue-900/40 p-3 rounded-lg transition-all hover:bg-blue-100 dark:hover:bg-blue-900/50">
+                    <div className="text-blue-600 dark:text-blue-300 font-bold">✓</div>
+                    <p className="text-sm text-gray-700 dark:text-gray-200">Schedule service provider appointments and viewings</p>
                   </div>
                 </div>
               </div>
@@ -406,89 +448,98 @@ export default function Home() {
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Your Home {activeTab === "buyers" ? "Buying" : "Selling"} Progress
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-300 mb-6">
-              Track your transaction journey
-            </p>
-            <div className="mt-6 flex justify-center gap-4">
-              <button
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === "buyers"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-                }`}
-                onClick={() => setActiveTab("buyers")}
-              >
-                For Buyers
-              </button>
-              <button
-                className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeTab === "sellers"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
-                }`}
-                onClick={() => setActiveTab("sellers")}
-              >
-                For Sellers
-              </button>
+          <div className="max-w-5xl mx-auto mb-12">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 inline-flex items-center">
+                Your Home 
+                <div className="relative mx-2 inline-block">
+                  <button
+                    onClick={() => setActiveTab(activeTab === "buyers" ? "sellers" : "buyers")}
+                    className="px-3 py-1 rounded-md bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                  >
+                    {activeTab === "buyers" ? "Buying" : "Selling"}
+                    <span className="ml-1 text-xs">▼</span>
+                  </button>
+                  <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-blue-500"></div>
+                </div> Progress
+              </h2>
+              <p className="text-lg text-gray-600 dark:text-gray-300">
+                Track your transaction journey with AI-powered assistance
+              </p>
             </div>
-            <div className="mt-4 flex justify-center items-center">
-              <div className="bg-white dark:bg-gray-800 rounded-full p-1 shadow-sm inline-flex">
-                <button
-                  className={`flex items-center px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                    showAIComparison
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-700 dark:text-gray-300"
-                  }`}
-                  onClick={() => setShowAIComparison(true)}
-                >
-                  <span className="mr-1">🤖</span> With AI
-                </button>
-                <button
-                  className={`flex items-center px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                    !showAIComparison
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-700 dark:text-gray-300"
-                  }`}
-                  onClick={() => setShowAIComparison(false)}
-                >
-                  <span className="mr-1">👤</span> Traditional
-                </button>
+            
+            <div className="flex flex-col md:flex-row md:items-center md:justify-center">
+              <div className="flex justify-center mb-4 md:mb-0">
+                <div className="inline-flex rounded-full bg-gray-100 dark:bg-gray-800 p-1">
+                  <button
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                      activeTab === "buyers"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    }`}
+                    onClick={() => setActiveTab("buyers")}
+                  >
+                    For Buyers
+                  </button>
+                  <button
+                    className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                      activeTab === "sellers"
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                    }`}
+                    onClick={() => setActiveTab("sellers")}
+                  >
+                    For Sellers
+                  </button>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-8 mb-4">
-            <div className="text-center mb-4">
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                {activeTab === "buyers" 
-                  ? `${buyerStages.filter(s => s.isCompleted).length}/${buyerStages.length} steps completed`
-                  : `${sellerStages.filter(s => s.isCompleted).length}/${sellerStages.length} steps completed`
-                }
-              </span>
-              <div className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                Estimated time to completion: <span className="font-medium text-blue-600 dark:text-blue-400">
-                  {showAIComparison 
-                    ? getTotalDuration() 
-                    : getTotalDuration(false)
-                  } days
-                </span>
-                {showAIComparison && (
-                  <span className="ml-2 text-green-600 dark:text-green-400">
-                    ({Math.round((1 - getTotalDuration() / getTotalDuration(false)) * 100)}% faster with AI)
-                  </span>
-                )}
+          <div className="mt-8 mb-6">
+            <div className="mb-6">
+              <div className="flex justify-center items-center space-x-2 mb-8" ref={timelineRef}>
+                {getActiveStages().map((stage) => (
+                  <div
+                    key={stage.id}
+                    className={`relative w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${
+                      animatedSteps.includes(stage.id)
+                        ? "bg-green-500 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                    }`}
+                    style={{
+                      transform: animatedSteps.includes(stage.id) ? "scale(1.2)" : "scale(1)",
+                      transition: "all 0.5s ease-out",
+                    }}
+                  >
+                    <span className="text-xs font-medium">
+                      {stage.id}
+                    </span>
+                    {animatedSteps.includes(stage.id) && (
+                      <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            
+            <div 
+              className={`transform transition-all duration-700 ${
+                showCompletionAnimation ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+              }`}
+            >
+            </div>
+            
+            <div className="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-8">
               <div 
-                className="h-full bg-blue-600 dark:bg-blue-500 rounded-full"
+                className="h-full bg-green-600 dark:bg-green-500 rounded-full"
                 style={{ 
                   width: `${getProgressPercentage()}%`,
-                  transition: "width 0.5s ease-out"
+                  transition: "width 1s ease-out",
+                  animation: "progressFill 1.5s ease-out"
                 }}
               ></div>
             </div>
@@ -501,26 +552,50 @@ export default function Home() {
               <div className="w-1/3 font-medium text-gray-700 dark:text-gray-300">Stage</div>
               <div className="w-2/3 flex">
                 <div className="flex-grow text-center text-sm font-medium text-gray-500 dark:text-gray-400">
-                  Timeline ({showAIComparison ? "with AI" : "traditional"})
+                  Timeline Comparison
                 </div>
+              </div>
+            </div>
+            
+            {/* Legend */}
+            <div className="bg-white dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700 flex justify-end items-center gap-4">
+              <div className="flex items-center text-xs text-gray-600 dark:text-gray-300">
+                <span className="inline-block w-3 h-3 rounded-full bg-blue-500 mr-1"></span>
+                With AI
+              </div>
+              <div className="flex items-center text-xs text-gray-600 dark:text-gray-300">
+                <span className="inline-block w-3 h-3 rounded-full bg-gray-400/20 border border-dashed border-gray-400 mr-1"></span>
+                Traditional
               </div>
             </div>
             
             {/* Timeline Stages Gantt Chart */}
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {getActiveStages().map((stage) => {
-                // Calculate width percentage based on duration relative to total
-                const totalDuration = showAIComparison ? getTotalDuration() : getTotalDuration(false);
-                const duration = showAIComparison ? stage.duration : stage.traditionalDuration;
-                const stageWidth = (duration / totalDuration) * 100;
+                // Use AI timeline as the basis for displaying both timelines
+                const totalAIDuration = getTotalDuration(true);
+                const totalTraditionalDuration = getTotalDuration(false);
                 
-                // Calculate position based on completed previous stages
-                const previousStages = getActiveStages().filter(s => s.id < stage.id);
-                const previousDuration = previousStages.reduce(
-                  (sum, s) => sum + (showAIComparison ? s.duration : s.traditionalDuration), 
+                // Calculate the width and position for the AI timeline
+                const aiDuration = stage.duration;
+                const aiWidth = (aiDuration / totalTraditionalDuration) * 100; // Use traditional as reference for better comparison
+                
+                const previousAIStages = getActiveStages().filter(s => s.id < stage.id);
+                const previousAIDuration = previousAIStages.reduce(
+                  (sum, s) => sum + s.duration, 
                   0
                 );
-                const stagePosition = (previousDuration / totalDuration) * 100;
+                const aiPosition = (previousAIDuration / totalTraditionalDuration) * 100;
+                
+                // Calculate the width and position for the traditional timeline
+                const traditionalDuration = stage.traditionalDuration;
+                const traditionalWidth = (traditionalDuration / totalTraditionalDuration) * 100;
+                
+                const previousTraditionalDuration = previousAIStages.reduce(
+                  (sum, s) => sum + s.traditionalDuration, 
+                  0
+                );
+                const traditionalPosition = (previousTraditionalDuration / totalTraditionalDuration) * 100;
                 
                 return (
                   <div 
@@ -537,57 +612,92 @@ export default function Home() {
                       >
                         <div 
                           className={`w-7 h-7 rounded-full flex items-center justify-center mr-3 transition-all duration-300 ${
-                            stage.isCompleted 
-                              ? "bg-blue-600 text-white" 
+                            animatedSteps.includes(stage.id)
+                              ? "bg-green-600 text-white" 
                               : "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400"
                           }`}
                         >
-                          <span className="text-xs font-medium">{stage.id}</span>
+                          <span className="text-xs font-medium">
+                            {stage.id}
+                          </span>
                         </div>
                         <div>
                           <h3 className={`font-medium ${
-                            stage.isCompleted 
+                            animatedSteps.includes(stage.id)
                               ? "text-gray-900 dark:text-white" 
                               : "text-gray-600 dark:text-gray-300"
                           }`}>
                             {stage.title}
                           </h3>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {showAIComparison ? stage.duration : stage.traditionalDuration} days
+                            {stage.duration} days
                           </p>
                         </div>
                       </div>
                       
                       {/* Timeline Gantt Bar */}
                       <div className="w-full md:w-2/3 flex items-center">
-                        <div className="w-full bg-gray-100 dark:bg-gray-700 h-8 rounded-md relative">
+                        <div className="w-full bg-gray-100 dark:bg-gray-700 h-10 rounded-md relative overflow-hidden">
+                          {/* Traditional Timeline Bar (shown behind as a full-width element) */}
                           <div 
-                            className={`absolute top-0 bottom-0 rounded-md ${
-                              stage.isCompleted 
-                                ? "bg-green-500 dark:bg-green-600" 
-                                : "bg-blue-500 dark:bg-blue-600"
-                            } flex items-center justify-start px-2`}
+                            className="absolute top-0 bottom-0 left-0 right-0 rounded-md bg-gray-200 dark:bg-gray-600"
+                          ></div>
+                          
+                          {/* Traditional Timeline Bar */}
+                          <div 
+                            className="absolute top-0 bottom-0 rounded-md bg-gray-400/40 dark:bg-gray-500/40"
                             style={{ 
-                              width: `${stageWidth}%`, 
-                              left: `${stagePosition}%`,
-                              transition: "width 0.5s ease-out, left 0.5s ease-out"
+                              width: `${traditionalWidth}%`, 
+                              left: `${traditionalPosition}%`,
+                              transition: "width 0.8s ease-out, left 0.8s ease-out"
                             }}
                           >
-                            <span className="text-xs font-medium text-white truncate">
-                              {stage.title}
-                            </span>
+                            <div className="absolute top-0 bottom-0 left-0 w-full flex items-center justify-center">
+                              <span className="text-xs font-medium text-gray-700 dark:text-gray-300 opacity-70 px-2">
+                                {stage.traditionalDuration}d
+                              </span>
+                            </div>
                           </div>
                           
-                          {/* Show traditional timeline comparison as a ghost */}
-                          {showAIComparison && (
+                          {/* AI Timeline Bar with animation */}
+                          <div 
+                            className={`absolute inset-0 rounded-md ${
+                              animatedSteps.includes(stage.id)
+                                ? "bg-green-500 dark:bg-green-600" 
+                                : "bg-blue-500 dark:bg-blue-600"
+                            } flex items-center justify-center`}
+                            style={{ 
+                              width: `${aiWidth}%`, 
+                              left: `${aiPosition}%`,
+                              height: "100%",
+                              transition: "width 1s ease-out, left 1s ease-out, background-color 0.5s ease-out",
+                              opacity: isVisible ? 1 : 0,
+                              animation: animatedSteps.includes(stage.id) ? "pulseScale 2s ease-in-out" : "none",
+                            }}
+                          >
+                            <span className="text-xs font-bold text-white">
+                              {stage.duration}d
+                            </span>
+                            
+                            {animatedSteps.includes(stage.id) && (
+                              <span className="absolute -right-1 -top-1 flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Time savings indicator with improved animation */}
+                          {animatedSteps.includes(stage.id) && (
                             <div 
-                              className="absolute top-0 bottom-0 rounded-md bg-gray-400/20 dark:bg-gray-500/20 border border-dashed border-gray-400 dark:border-gray-500"
-                              style={{ 
-                                width: `${(stage.traditionalDuration / getTotalDuration(false)) * 100}%`, 
-                                left: `${previousStages.reduce((sum, s) => sum + s.traditionalDuration, 0) / getTotalDuration(false) * 100}%`,
-                                transition: "width 0.5s ease-out, left 0.5s ease-out"
+                              className="absolute -right-1 top-2 transform -translate-y-1/2 bg-green-600 text-white text-xs px-2 py-0.5 rounded-l-full opacity-0 z-30"
+                              style={{
+                                animation: "fadeIn 0.8s ease-out 0.3s forwards", // Delay the animation for a sequence effect
+                                boxShadow: "0 1px 3px rgba(0,0,0,0.2)"
                               }}
-                            ></div>
+                            >
+                              {Math.round((1 - stage.duration / stage.traditionalDuration) * 100)}% faster
+                            </div>
                           )}
                         </div>
                       </div>
@@ -724,6 +834,22 @@ export default function Home() {
         @keyframes shine {
           from { background-position: 200% 0; }
           to { background-position: 0 0; }
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateX(10px); }
+          to { opacity: 0.9; transform: translateX(0); }
+        }
+        
+        @keyframes pulseScale {
+          0% { transform: scale(1) translateY(0); }
+          50% { transform: scale(1.02) translateY(-1px); }
+          100% { transform: scale(1) translateY(0); }
+        }
+        
+        @keyframes progressFill {
+          from { width: 0%; }
+          to { width: 100%; }
         }
       `}</style>
     </div>
