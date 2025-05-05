@@ -1,6 +1,6 @@
-Thought for a second
 
-.
+## File Structure
+````
 ├── src
 │   ├── app
 │   │   ├── layout.tsx         # Root layout (HTML <head>, global providers)
