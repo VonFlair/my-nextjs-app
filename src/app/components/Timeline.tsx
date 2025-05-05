@@ -173,10 +173,11 @@ export default function Timeline({
 
   // ── Entrance animation & observer ────────────────
   useEffect(() => {
-    if (isVisible && timelineRef.current) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          if (entries[0].isIntersecting) {
+    if (!isVisible || !timelineRef.current) return;
+    let hasRun = false;
+    const observer = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting && !hasRun) {
+                hasRun = true;
             setShowCompletionAnimation(true);
             setAnimatedSteps([]);
             const allStages = getActiveStages();
@@ -193,7 +194,7 @@ export default function Timeline({
       );
       observer.observe(timelineRef.current);
       return () => observer.disconnect();
-    }
+    
   }, [isVisible, activeTab]);
 
   // ── JSX ───────────────────────────────────────────
