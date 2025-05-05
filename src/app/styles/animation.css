@@ -1,0 +1,26 @@
+@keyframes gradientBackground {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  
+  @keyframes shine {
+    from { background-position: 200% 0; }
+    to { background-position: 0 0; }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 0.9; transform: translateX(0); }
+  }
+  
+  @keyframes pulseScale {
+    0% { transform: scale(1) translateY(0); }
+    50% { transform: scale(1.02) translateY(-1px); }
+    100% { transform: scale(1) translateY(0); }
+  }
+  
+  @keyframes progressFill {
+    from { width: 0%; }
+    to { width: 100%; }
+  }

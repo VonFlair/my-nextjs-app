@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import '@/app/styles/animation.css'
 
 /**
  * TimelineStage type definition for the real estate journey stages
@@ -26,21 +27,17 @@ type FeatureItem = {
 };
 
 /**
- * Home component representing the hero section for Homekey real estate platform
+  Hero section for Homekey real estate platform
  */
 export default function Home() {
   // State for animation and interaction control
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<"buyers" | "sellers">("buyers");
-  const [activeBuyerStage, setActiveBuyerStage] = useState<number>(2);
-  const [activeSellerStage, setActiveSellerStage] = useState<number>(3);
-  const [isHovering, setIsHovering] = useState<number | null>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
   const [showCompletionAnimation, setShowCompletionAnimation] = useState<boolean>(false);
   const [animatedSteps, setAnimatedSteps] = useState<number[]>([]);
 
   // State for timeline interactions
-  const [showAIComparison, setShowAIComparison] = useState<boolean>(true);
   const [expandedBenefit, setExpandedBenefit] = useState<number | null>(null);
 
   // Buyer journey timeline stages
@@ -222,12 +219,6 @@ export default function Home() {
   ];
 
   // Tool items for the tabbed interface
-  const tools = [
-    { id: "documentAnalysis", label: "Document Analysis", icon: "📄" },
-    { id: "listingCopilot", label: "Listing Copilot", icon: "🏠" },
-    { id: "propertySearch", label: "Property Search", icon: "🔍" },
-    { id: "propertyAnalysis", label: "Property Analysis", icon: "📊" },
-  ];
 
   // Simulate entrance animation on component mount
   useEffect(() => {
@@ -269,27 +260,6 @@ export default function Home() {
     }
   }, [isVisible, activeTab]);
 
-  // Handle stage selection for timeline
-  const handleStageClick = (stageId: number) => {
-    if (activeTab === "buyers") {
-      setActiveBuyerStage(stageId);
-    } else {
-      setActiveSellerStage(stageId);
-    }
-  };
-
-  // Handle stage hover
-  const handleStageHover = (stageId: number | null) => {
-    setIsHovering(stageId);
-  };
-
-  // Helper function to determine if a stage is active
-  const isStageActive = (stageId: number): boolean => {
-    return activeTab === "buyers" 
-      ? stageId === activeBuyerStage 
-      : stageId === activeSellerStage;
-  };
-
   // Helper function to determine progress percentage
   const getProgressPercentage = (): number => {
     const stages = activeTab === "buyers" ? buyerStages : sellerStages;
@@ -314,10 +284,6 @@ export default function Home() {
   };
 
   // Helper function to calculate time savings percentage
-  const getTimeSavingsPercentage = (): number => {
-    return Math.round((1 - getTotalDuration(true) / getTotalDuration(false)) * 100);
-  };
-
   return (
     <div 
       className="min-h-screen bg-white dark:bg-gray-950 overflow-hidden"
@@ -400,13 +366,13 @@ export default function Home() {
             </div>
             <div className="md:w-1/2 relative">
               <div 
-                className="bg-blue-50 dark:bg-blue-50 rounded-xl shadow-xl p-6 relative overflow-hidden"
+                className="bg-blue-10 dark:bg-blue-50 rounded-xl shadow-xl p-6 relative overflow-hidden"
                 style={{
                   boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)",
-                  background: "linear-gradient(180deg, rgba(0, 52, 105, 0.5) 0%, rgb(4, 100, 195) 100%)",
+
                 }}
               >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-50 to-indigo-50"></div>
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   Your Complete Roadmap for Buying or Selling a Home
                 </h2>
@@ -573,7 +539,6 @@ export default function Home() {
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {getActiveStages().map((stage) => {
                 // Use AI timeline as the basis for displaying both timelines
-                const totalAIDuration = getTotalDuration(true);
                 const totalTraditionalDuration = getTotalDuration(false);
                 
                 // Calculate the width and position for the AI timeline
