@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Thought for a second
 
-## Getting Started
+.
+├── src
+│   ├── app
+│   │   ├── layout.tsx         # Root layout (HTML <head>, global providers)
+│   │   ├── page.tsx           # Main entry: Hero, Timeline, Features, Footer
+│   │   ├── styles
+│   │   │   └── animation.css  #  animations
+│   │   ├── types
+│   │   │   └── item.ts        # Shared TS types: TimelineStage, FeatureItem
+│   │   ├── data
+│   │   │   └── stages.ts      # Static arrays: buyer/seller stages & features
+│   │   ├── components
+│   │   │   ├── Hero.tsx       # Navbar + Hero section
+│   │   │   ├── Timeline.tsx   # AI timeline & Gantt chart
+│   │   │   ├── Features.tsx   # Feature grid for buyers/sellers
+│   │   │   └── Footer.tsx     # Site footer
+│   │   └── globals.css        # Tailwind & global styles
+│   ├── public                 # Static assets (favicon, images)
+│   └── README.md              # ← You are here
+├── next.config.ts             # Next.js configuration
+├── tsconfig.json              # TypeScript configuration
+├── package.json               # NPM scripts & dependencies
+└── postcss.config.js          # Tailwind/PostCSS setup
 
-First, run the development server:
+````
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔗 Key Integration Points
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 1. Timeline & Stages
+- **File:** `src/data/stages.ts`  
+  Contains `buyerStages` and `sellerStages`: arrays of `TimelineStage`.  
+- **Frontend:** passed as props into `Timeline` component (`src/app/components/Timeline.tsx`).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Backend tasks:**
+- Replace static arrays with calls to your REST/GraphQL endpoints.
+- Each stage should map to a database record (e.g. `timeline_stages` table).
+- Expose endpoints:
+  - `GET /api/stages?type=buyer|seller`
+  - `PATCH /api/stages/:id` to update completion/status.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+### 2. Feature Listings
+- **File:** `src/data/stages.ts`  
+  Also exports `buyerFeatures` and `sellerFeatures`: arrays of `FeatureItem`.  
+- **Frontend:** `Features.tsx` renders based on `activeTab`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Backend tasks:**
+- Serve feature content dynamically, if needed:
+  - `GET /api/features?role=buyer|seller`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+### 3. Types & Contracts
+- **File:** `src/app/types/item.ts`  
+  Defines shared interfaces:
+  ```ts
+  export type TimelineStage = { id, title, description, duration, traditionalDuration, aiBenefit, isCompleted }
+  export type FeatureItem = { id, title, description, icon }
+````
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4. Component Props
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+* **Hero.tsx**
+  Props: `isVisible`, `activeTab`, `setActiveTab`
+* **Timeline.tsx**
+  Props: `isVisible`, `activeTab`, `setActiveTab`, `timelineRef`, `animatedSteps`, `setAnimatedSteps`, `showCompletionAnimation`, `setShowCompletionAnimation`, `expandedBenefit`, `setExpandedBenefit`, `setIsVisible`
+* **Features.tsx**
+  Props: `activeTab`, `setActiveTab`, `buyerFeatures`, `sellerFeatures`
+* **Footer.tsx**
+  No props
+
+---
+
+## 🛠️ Running & Developing
+
+1. **Install**
+
+   ```bash
+   npm install
+   ```
+2. **Dev Server**
+
+   ```bash
+   npm run dev
+   ```
