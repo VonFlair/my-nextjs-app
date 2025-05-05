@@ -61,7 +61,6 @@
   ```ts
   export type TimelineStage = { id, title, description, duration, traditionalDuration, aiBenefit, isCompleted }
   export type FeatureItem = { id, title, description, icon }
-````
 ---
 
 ### 4. Component Props
