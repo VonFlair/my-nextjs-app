@@ -88,3 +88,16 @@
    ```bash
    npm run dev
    ```
+
+3. **Backend API**
+  ```bash
+   cd backend
+   npm install
+   npm run dev
+   ```
+
+4. **MySQL Database**
+  ```bash
+   cd backend
+   ./pocketbase serve
+  ```

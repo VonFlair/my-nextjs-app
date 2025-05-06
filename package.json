@@ -9,16 +9,21 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "express": "^5.1.0",
+    "next": "15.3.1",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.3.1"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4"
-  }
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  },
+  "description": "```` ├── src │   ├── app │   │   ├── layout.tsx         # Root layout (HTML <head>, global providers) │   │   ├── page.tsx           # Main entry: Hero, Timeline, Features, Footer │   │   ├── styles │   │   │   └── animation.css  #  animations │   │   ├── types │   │   │   └── item.ts        # Shared TS types: TimelineStage, FeatureItem │   │   ├── data │   │   │   └── stages.ts      # Static arrays: buyer/seller stages & features │   │   ├── components │   │   │   ├── Hero.tsx       # Navbar + Hero section │   │   │   ├── Timeline.tsx   # AI timeline & Gantt chart │   │   │   ├── Features.tsx   # Feature grid for buyers/sellers │   │   │   └── Footer.tsx     # Site footer │   │   └── globals.css        # Tailwind & global styles │   ├── public                 # Static assets (favicon, images) │   └── README.md              # ← You are here ├── next.config.ts             # Next.js configuration ├── tsconfig.json              # TypeScript configuration ├── package.json               # NPM scripts & dependencies └── postcss.config.js          # Tailwind/PostCSS setup",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC"
 }
