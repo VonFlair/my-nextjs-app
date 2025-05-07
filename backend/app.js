@@ -1,108 +1,131 @@
-import PocketBase from "pocketbase"
-import express from 'express'
-import { get_stage_records, get_feature_records, update_stage_record} from "./db.js";
+// File: app.js
+import express from 'express';
+import cors from 'cors';
 
-const app = express()
-const port = 8080
+import {
+  listStages,
+  getStage,
+  createStage,
+  updateStage,
+  deleteStage,
+  listTasks,
+  getTask,
+  createTask,
+  updateTask,
+  deleteTask
+} from './db.js';
 
+const app = express();
+const port = 8080;
+
+// CORS + JSON body parsing
+app.use(cors({ origin: 'http://localhost:3000' }));
 app.use(express.json());
 
-app.get("/", (req, res) => {
-  res.send('Wassup Homekey!')
-})
+/** Stages CRUD **/
 
-/**
- * GET /api/stages - Retrieves stages filtered by type
- * 
- * Query Parameters:
- *   - type: (required) Filter stages by type ("buyer" or "seller")
- * 
- * Example Usage:
- *   - GET /api/stages?type=buyer - Returns all buyer stages
- *   - GET /api/stages?type=seller - Returns all seller stages
- * 
- * Returns:
- *   - Array of stage objects with fields: id, title, description, isCompleted, 
- *     aiBenefit, duration, traditionalDuration
- *   - 500 status with error message on failure
- */
-app.get("/api/stages", async (req, res) => {
+// GET /api/stages?type=buyer|seller
+app.get('/api/stages', async (req, res) => {
   try {
-    const type = req.query.type;
-    let records = await get_stage_records(type)
-    res.send(records)
-  } catch (error) {
-    console.error(`Error in GET /api/stages/`, error);
-    res.status(500).json({ error: "Server error" });
+    const stages = await listStages(req.query.type);
+    res.json(stages);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-})
+});
 
-/**
- * GET /api/features - Retrieves features filtered by role
- * 
- * Query Parameters:
- *   - role: (required) Filter features by role ("buyer" or "seller")
- * 
- * Example Usage:
- *   - GET /api/features?role=buyer - Returns all buyer features
- *   - GET /api/features?role=seller - Returns all seller features
- * 
- * Returns:
- *   - Array of feature objects with fields: id, title, description, icon
- *   - 500 status with error message on failure
- */
-app.get("/api/features", async (req, res) => {
+// GET /api/stages/:id
+app.get('/api/stages/:id', async (req, res) => {
   try {
-    const role = req.query.role;
-    let records = await get_feature_records(role)
-    res.send(records)
-  } catch (error) {
-    console.error(`Error in GET /api/features/`, error);
-    res.status(500).json({ error: "Server error" });
+    const stage = await getStage(req.params.id);
+    res.json(stage);
+  } catch {
+    res.status(404).json({ error: 'Stage not found' });
   }
-})
+});
 
-/**
- * PATCH /api/stages/:id - Updates a specific stage's completion status
- * 
- * URL Parameters:
- *   - id: (required) The unique identifier of the stage to update
- * 
- * Request Body:
- *   - isCompleted: (required) Boolean value indicating completion status
- *     Can be boolean (true/false) or string ("true"/"false")
- * 
- * Example Usage:
- *   - PATCH /api/stages/352g0vu3ephe533
- *     Body: { "isCompleted": true }
- * 
- * Returns:
- *   - Success response with updated stage data on success
- *   - 400 status with error message if update fails
- *   - 500 status for server errors
- */
-app.patch("/api/stages/:id", async (req, res) => {
+// POST /api/stages
+app.post('/api/stages', async (req, res) => {
   try {
-    const id = req.params.id;
-    const { isCompleted } = req.body;
-    
-    const completedValue = typeof isCompleted === "string"
-      ? isCompleted.toLowerCase() === "true"
-      : Boolean(isCompleted);
-    
-    const result = await update_stage_record(id, { isCompleted: completedValue });
-    
-    if (result.success) {
-      res.json(result.success);
-    } else {
-      res.status(400).json({ error: result.error });
-    }
-  } catch (error) {
-    console.error(`Error in PATCH /api/stages/${req.params.id}:`, error);
-    res.status(500).json({ error: "Server error" });
+    const newStage = await createStage(req.body);
+    res.status(201).json(newStage);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// PATCH /api/stages/:id
+app.patch('/api/stages/:id', async (req, res) => {
+  try {
+    const updated = await updateStage(req.params.id, req.body);
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// DELETE /api/stages/:id
+app.delete('/api/stages/:id', async (req, res) => {
+  try {
+    await deleteStage(req.params.id);
+    res.status(204).end();
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+/** Tasks CRUD **/
+
+// GET /api/tasks?stageId=<id>
+app.get('/api/tasks', async (req, res) => {
+  try {
+    const tasks = await listTasks(req.query.stageId);
+    res.json(tasks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/tasks/:id
+app.get('/api/tasks/:id', async (req, res) => {
+  try {
+    const task = await getTask(req.params.id);
+    res.json(task);
+  } catch {
+    res.status(404).json({ error: 'Task not found' });
+  }
+});
+
+// POST /api/tasks
+app.post('/api/tasks', async (req, res) => {
+  try {
+    const newTask = await createTask(req.body);
+    res.status(201).json(newTask);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// PATCH /api/tasks/:id
+app.patch('/api/tasks/:id', async (req, res) => {
+  try {
+    const updated = await updateTask(req.params.id, req.body);
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// DELETE /api/tasks/:id
+app.delete('/api/tasks/:id', async (req, res) => {
+  try {
+    await deleteTask(req.params.id);
+    res.status(204).end();
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 });
 
 app.listen(port, () => {
-  console.log(`Homekey api listening on port ${port}`)
-})
+  console.log(`API listening on http://localhost:${port}`);
+});

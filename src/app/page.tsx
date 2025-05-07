@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef } from "react";
 import '@/app/styles/animation.css'
-import footer from "@/app/components/Footer";
+import Footer from "@/app/components/Footer";
 import Hero from "@/app/components/Hero";
 import Features from "@/app/components/Features"
-import Timeline from "./components/Timeline";
+import Timeline from "@/app/components/Timeline";
+import Nav from "@/app/components/Navbar";
 import type { FeatureItem,TimelineStage } from "./types/item";
 import {
   buyerStages,
@@ -88,7 +89,9 @@ export default function Home() {
         backgroundSize: "300% 300%",
       }}
     >
-
+      <Nav
+        isVisible={isVisible}
+        />
       {/* Hero Section */}
       <Hero
         isVisible={isVisible}
@@ -115,7 +118,7 @@ export default function Home() {
       <Features activeTab={activeTab} setActiveTab={setActiveTab} />
 
       {/* Footer */}
-            <footer/>
+      <Footer/>
       </div>
   );
 }
