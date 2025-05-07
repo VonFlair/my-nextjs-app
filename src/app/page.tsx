@@ -7,7 +7,7 @@ import Hero from "@/app/components/Hero";
 import Features from "@/app/components/Features"
 import Timeline from "@/app/components/Timeline";
 import Nav from "@/app/components/Navbar";
-import type { FeatureItem,TimelineStage } from "./types/item";
+import type { FeatureItem,TimelineStage } from "@/app/types/item";
 import {
   buyerStages,
   sellerStages,
